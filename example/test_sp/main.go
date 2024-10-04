@@ -9,7 +9,7 @@ import(
   "log"
   "os"
   "path/filepath"
-  "github.com/uoregon-libraries/go_saml"
+  "github.com/uoregon-libraries/go_saml/saml"
 )
 
 func main(){
