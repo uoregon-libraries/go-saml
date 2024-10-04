@@ -4,11 +4,7 @@ import(
   "github.com/labstack/echo/v4"
   "github.com/labstack/echo/v4/middleware"
   "github.com/crewjam/saml/samlsp"
-  "github.com/tidwall/gjson"
   "net/http"
-  "log"
-  "os"
-  "path/filepath"
   "github.com/uoregon-libraries/go-saml"
 )
 
