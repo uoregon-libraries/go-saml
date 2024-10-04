@@ -41,6 +41,7 @@ func SamlSetup()(*samlsp.Middleware){
   cert := os.Getenv("SAML_CERT")
   key := os.Getenv("SAML_KEY")
   idp_url := os.Getenv("SAML_IDP_METADATA_URL")
+  base_url := os.Getenv("BASE_URL")
 
   keyPair, err := tls.LoadX509KeyPair(cert, key)
   if err != nil { log.Println(err) }
