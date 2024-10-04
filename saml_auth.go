@@ -1,4 +1,4 @@
-package saml
+package go_saml
 
 import(
   "context"
