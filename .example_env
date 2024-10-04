@@ -1,0 +1,5 @@
+SAML_CERT=/home/lsato/go_saml/example/test_sp/files/myservice.cert
+SAML_KEY=/home/lsato/go_saml/example/test_sp/files/myservice.key
+SAML_IDP_METADATA_URL=http://localhost:8000/metadata
+BASE_URL=http://localhost:8080
+HOME_DIR=/home/lsato/go_saml/example/test_sp
