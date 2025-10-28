@@ -6,9 +6,9 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"flag"
+	"net/http"
 	"net/url"
 
-	"github.com/zenazn/goji"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/crewjam/saml/logger"
@@ -73,7 +73,7 @@ UzreO96WzlBBMtY=
 
 func main() {
 	logr := logger.DefaultLogger
-	baseURLstr := flag.String("idp", "http://localhost:8000", "The URL to the IDP")
+	baseURLstr := flag.String("idp", "", "The URL to the IDP")
 	flag.Parse()
 
 	baseURL, err := url.Parse(*baseURLstr)
@@ -118,7 +118,5 @@ func main() {
 		logr.Fatalf("%s", err)
 	}
 
-	goji.Handle("/*", idpServer)
-	goji.Serve()
+	http.ListenAndServe(":8080", idpServer)
 }
-

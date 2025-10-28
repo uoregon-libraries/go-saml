@@ -4,7 +4,6 @@ go 1.25.1
 
 require (
 	github.com/crewjam/saml v0.5.1
-	github.com/zenazn/goji v1.0.1
 	golang.org/x/crypto v0.43.0
 )
 
