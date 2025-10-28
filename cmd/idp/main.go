@@ -16,7 +16,7 @@ import (
 )
 
 var key = func() crypto.PrivateKey {
-	b, _ := pem.Decode([]byte(`-----BEGIN RSA PRIVATE KEY-----
+	var b, _ = pem.Decode([]byte(`-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA0OhbMuizgtbFOfwbK7aURuXhZx6VRuAs3nNibiuifwCGz6u9
 yy7bOR0P+zqN0YkjxaokqFgra7rXKCdeABmoLqCC0U+cGmLNwPOOA0PaD5q5xKhQ
 4Me3rt/R9C4Ca6k3/OnkxnKwnogcsmdgs2l8liT3qVHP04Oc7Uymq2v09bGb6nPu
@@ -43,12 +43,12 @@ H++S/wKBgQDIkqBtFr9UEf8d6JpkxS0RXDlhSMjkXmkQeKGFzdoJcYVFIwq8jTNB
 nJrVIGs3GcBkqGic+i7rTO1YPkquv4dUuiIn+vKZVoO6b54f+oPBXd4S0BnuEqFE
 rdKNuCZhiaE2XD9L/O9KP1fh5bfEcKwazQ23EvpJHBMm8BGC+/YZNw==
 -----END RSA PRIVATE KEY-----`))
-	k, _ := x509.ParsePKCS1PrivateKey(b.Bytes)
+	var k, _ = x509.ParsePKCS1PrivateKey(b.Bytes)
 	return k
 }()
 
 var cert = func() *x509.Certificate {
-	b, _ := pem.Decode([]byte(`-----BEGIN CERTIFICATE-----
+	var b, _ = pem.Decode([]byte(`-----BEGIN CERTIFICATE-----
 MIIDBzCCAe+gAwIBAgIJAPr/Mrlc8EGhMA0GCSqGSIb3DQEBBQUAMBoxGDAWBgNV
 BAMMD3d3dy5leGFtcGxlLmNvbTAeFw0xNTEyMjgxOTE5NDVaFw0yNTEyMjUxOTE5
 NDVaMBoxGDAWBgNVBAMMD3d3dy5leGFtcGxlLmNvbTCCASIwDQYJKoZIhvcNAQEB
@@ -67,21 +67,21 @@ y/+1gHg2pxjGnhRBN6el/gSaDiySIMKbilDrffuvxiCfbpPN0NRRiPJhd2ay9KuL
 GFsTG2DLxnvr4GdN1BSr0Uu/KV3adj47WkXVPeMYQti/bQmxQB8tRFhrw80qakTL
 UzreO96WzlBBMtY=
 -----END CERTIFICATE-----`))
-	c, _ := x509.ParseCertificate(b.Bytes)
+	var c, _ = x509.ParseCertificate(b.Bytes)
 	return c
 }()
 
 func main() {
-	logr := logger.DefaultLogger
-	baseURLstr := flag.String("idp", "", "The URL to the IDP")
+	var logr = logger.DefaultLogger
+	var baseURLstr = flag.String("idp", "", "The URL to the IDP")
 	flag.Parse()
 
-	baseURL, err := url.Parse(*baseURLstr)
+	var baseURL, err = url.Parse(*baseURLstr)
 	if err != nil {
 		logr.Fatalf("cannot parse base URL: %v", err)
 	}
 
-	idpServer, err := samlidp.New(samlidp.Options{
+	var idpServer, err = samlidp.New(samlidp.Options{
 		URL:         *baseURL,
 		Key:         key,
 		Logger:      logr,
@@ -92,7 +92,7 @@ func main() {
 		logr.Fatalf("%s", err)
 	}
 
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("hunter2"), bcrypt.DefaultCost)
+	var hashedPassword, _ = bcrypt.GenerateFromPassword([]byte("hunter2"), bcrypt.DefaultCost)
 	err = idpServer.Store.Put("/users/alice", samlidp.User{Name: "alice",
 		HashedPassword: hashedPassword,
 		Groups:         []string{"Administrators", "Users"},
