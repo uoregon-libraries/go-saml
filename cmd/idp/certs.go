@@ -4,6 +4,7 @@ import (
 	"crypto"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 )
 
 var encodedKey = []byte(`-----BEGIN RSA PRIVATE KEY-----
@@ -56,10 +57,20 @@ UzreO96WzlBBMtY=
 
 func getPrivateKey() (crypto.PrivateKey, error) {
 	var b, _ = pem.Decode(encodedKey)
-	return x509.ParsePKCS1PrivateKey(b.Bytes)
+	var key, err = x509.ParsePKCS1PrivateKey(b.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("parsing private key: %w", err)
+	}
+
+	return key, nil
 }
 
 func getCertificate() (*x509.Certificate, error) {
 	var b, _ = pem.Decode(encodedCert)
-	return x509.ParseCertificate(b.Bytes)
+	var cert, err = x509.ParseCertificate(b.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("parsing certificate: %w", err)
+	}
+
+	return cert, nil
 }
