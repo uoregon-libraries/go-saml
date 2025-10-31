@@ -1,4 +1,4 @@
-module saml-idp
+module go-saml
 
 go 1.25.1
 

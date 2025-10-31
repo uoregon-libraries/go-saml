@@ -1,4 +1,4 @@
-# SAML idp
+# Go SAML IDP
 
 This project is a simple dev-only drop-in replacement for a SAML identity
 provider. It is not a production-usable idp! The cert and private key are
@@ -10,7 +10,7 @@ To build simply run `make`. You'll need a supported Go compiler.
 The server is configured entirely through environment variables:
 
 ```
-Usage: IDP_BASE_URL=<url to this service> [other env options] ./bin/saml-idp
+Usage: IDP_BASE_URL=<url to this service> [other env options] ./bin/idp
 
 Starts a dev-friendly SAML IDP service listening on the URL's port.
 Configuration is specified via environment variables:
@@ -23,7 +23,7 @@ Configuration is specified via environment variables:
 ```
 
 An easy way to run this is to copy `vars-example` to `vars`, adjust the values
-as needed, `source vars` and then `./bin/saml-idp`.
+as needed, `source vars` and then `./bin/idp`.
 
 If you don't pre-register users or a service provider, you'll have to do that
 stuff at runtime using the REST methods provided by the server. More

@@ -1,6 +1,6 @@
 .PHONY: bin
 bin:
-	go build -ldflags="-s -w" -o bin/saml-idp saml-idp/cmd/idp
+	go build -ldflags="-s -w" -o bin/idp go-saml/cmd/idp
 
 .PHONY: lint
 lint:
