@@ -5,7 +5,11 @@ provider. It is not a production-usable idp! The cert and private key are
 *hard-coded* in the repository for ease of use, and that would be
 **disastrous** for a production setup.
 
+## Build
+
 To build simply run `make`. You'll need a supported Go compiler.
+
+## Configure
 
 The server is configured entirely through environment variables:
 
@@ -22,6 +26,8 @@ Configuration is specified via environment variables:
   service provider is pre-registered for use with this IDP.
 ```
 
+## Run
+
 An easy way to run this is to copy `vars-example` to `vars`, adjust the values
 as needed, `source vars` and then `./bin/idp`.
 
@@ -32,3 +38,9 @@ project][1], though you may find that cloning their project and digging around
 in the source code is easier.
 
 [1]: <https://pkg.go.dev/github.com/crewjam/saml#section-readme>
+
+## Cert
+
+Right now our certificate and private key are hard-coded (again please never
+use this in production). To set up a service provider, you need the cert. You
+can find it in `cmd/idp/certs.go`.
