@@ -1,22 +1,13 @@
-// Package main contains an example identity provider implementation.
 package main
 
 import (
 	"crypto"
 	"crypto/x509"
 	"encoding/pem"
-	"flag"
-	"net/url"
-
-	"github.com/zenazn/goji"
-	"golang.org/x/crypto/bcrypt"
-
-	"github.com/crewjam/saml/logger"
-	"github.com/crewjam/saml/samlidp"
+	"fmt"
 )
 
-var key = func() crypto.PrivateKey {
-	b, _ := pem.Decode([]byte(`-----BEGIN RSA PRIVATE KEY-----
+var encodedKey = []byte(`-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA0OhbMuizgtbFOfwbK7aURuXhZx6VRuAs3nNibiuifwCGz6u9
 yy7bOR0P+zqN0YkjxaokqFgra7rXKCdeABmoLqCC0U+cGmLNwPOOA0PaD5q5xKhQ
 4Me3rt/R9C4Ca6k3/OnkxnKwnogcsmdgs2l8liT3qVHP04Oc7Uymq2v09bGb6nPu
@@ -42,13 +33,9 @@ ErrOOy6EqH3rNWHvlxChuP50cFQJuYOueO6QggyCyruSOnDDuc0BM0SGq6+5g5s7
 H++S/wKBgQDIkqBtFr9UEf8d6JpkxS0RXDlhSMjkXmkQeKGFzdoJcYVFIwq8jTNB
 nJrVIGs3GcBkqGic+i7rTO1YPkquv4dUuiIn+vKZVoO6b54f+oPBXd4S0BnuEqFE
 rdKNuCZhiaE2XD9L/O9KP1fh5bfEcKwazQ23EvpJHBMm8BGC+/YZNw==
------END RSA PRIVATE KEY-----`))
-	k, _ := x509.ParsePKCS1PrivateKey(b.Bytes)
-	return k
-}()
+-----END RSA PRIVATE KEY-----`)
 
-var cert = func() *x509.Certificate {
-	b, _ := pem.Decode([]byte(`-----BEGIN CERTIFICATE-----
+var encodedCert = []byte(`-----BEGIN CERTIFICATE-----
 MIIDBzCCAe+gAwIBAgIJAPr/Mrlc8EGhMA0GCSqGSIb3DQEBBQUAMBoxGDAWBgNV
 BAMMD3d3dy5leGFtcGxlLmNvbTAeFw0xNTEyMjgxOTE5NDVaFw0yNTEyMjUxOTE5
 NDVaMBoxGDAWBgNVBAMMD3d3dy5leGFtcGxlLmNvbTCCASIwDQYJKoZIhvcNAQEB
@@ -66,59 +53,24 @@ y/+1gHg2pxjGnhRBN6el/gSaDiySIMKbilDrffuvxiCfbpPN0NRRiPJhd2ay9KuL
 /RxQRl1gl9cHaWiouWWba1bSBb2ZPhv2rPMUsFo98ntkGCObDX6Y1SpkqmoTbrsb
 GFsTG2DLxnvr4GdN1BSr0Uu/KV3adj47WkXVPeMYQti/bQmxQB8tRFhrw80qakTL
 UzreO96WzlBBMtY=
------END CERTIFICATE-----`))
-	c, _ := x509.ParseCertificate(b.Bytes)
-	return c
-}()
+-----END CERTIFICATE-----`)
 
-func main() {
-	logr := logger.DefaultLogger
-	baseURLstr := flag.String("idp", "http://localhost:8000", "The URL to the IDP")
-	flag.Parse()
-
-	baseURL, err := url.Parse(*baseURLstr)
+func getPrivateKey() (crypto.PrivateKey, error) {
+	var b, _ = pem.Decode(encodedKey)
+	var key, err = x509.ParsePKCS1PrivateKey(b.Bytes)
 	if err != nil {
-		logr.Fatalf("cannot parse base URL: %v", err)
+		return nil, fmt.Errorf("parsing private key: %w", err)
 	}
 
-	idpServer, err := samlidp.New(samlidp.Options{
-		URL:         *baseURL,
-		Key:         key,
-		Logger:      logr,
-		Certificate: cert,
-		Store:       &samlidp.MemoryStore{},
-	})
-	if err != nil {
-		logr.Fatalf("%s", err)
-	}
-
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("hunter2"), bcrypt.DefaultCost)
-	err = idpServer.Store.Put("/users/alice", samlidp.User{Name: "alice",
-		HashedPassword: hashedPassword,
-		Groups:         []string{"Administrators", "Users"},
-		Email:          "alice@example.com",
-		CommonName:     "Alice Smith",
-		Surname:        "Smith",
-		GivenName:      "Alice",
-	})
-	if err != nil {
-		logr.Fatalf("%s", err)
-	}
-
-	err = idpServer.Store.Put("/users/bob", samlidp.User{
-		Name:           "bob",
-		HashedPassword: hashedPassword,
-		Groups:         []string{"Users"},
-		Email:          "bob@example.com",
-		CommonName:     "Bob Smith",
-		Surname:        "Smith",
-		GivenName:      "Bob",
-	})
-	if err != nil {
-		logr.Fatalf("%s", err)
-	}
-
-	goji.Handle("/*", idpServer)
-	goji.Serve()
+	return key, nil
 }
 
+func getCertificate() (*x509.Certificate, error) {
+	var b, _ = pem.Decode(encodedCert)
+	var cert, err = x509.ParseCertificate(b.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("parsing certificate: %w", err)
+	}
+
+	return cert, nil
+}
