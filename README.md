@@ -11,7 +11,9 @@ To build simply run `make`. You'll need a supported Go compiler.
 
 ## Configure
 
-The server is configured entirely through environment variables:
+### Environment Variables
+
+The server is primarily configured through environment variables:
 
 ```
 Usage: IDP_BASE_URL=<url to this service> [other env options] ./bin/idp
@@ -24,20 +26,39 @@ Configuration is specified via environment variables:
   Passwords will be set to their username.
 - IDP_SERVICE_URL: Optional. URL to a service provider's metadata. If set, the
   service provider is pre-registered for use with this IDP.
+- IDP_SP_AUTOLOAD_DIR: Optional. Name of directory from which to load SP
+  metadata. All files that match *.xml in this directory will be loaded.
 ```
+
+### REST calls
+
+If you don't pre-register users or a service provider, you'll have to do that
+stuff at runtime using the REST methods provided by the server. e.g.:
+
+```bash
+# Make a user
+wget --method=PUT --body-data='{"name": "alice", "password": "hunter2"}' http://localhost:8000/users/alice
+
+# Register the metadata XML for an SP. The "1" can be any arbitrary id you want
+# (but must be different per SP), and only matters if you need to reference the
+# service again (e.g., via a DELETE call)
+wget --method=PUT --body-file=/path/to/metadata.xml http://localhost:8000/services/1
+```
+
+More information on these can be found in the [Go docs for the crewjam saml
+project][1], though you may find that cloning their project and digging around
+in the source code is easier.
+
+[1]: <https://pkg.go.dev/github.com/crewjam/saml#section-readme>
 
 ## Run
 
 An easy way to run this is to copy `vars-example` to `vars`, adjust the values
 as needed, `source vars` and then `./bin/idp`.
 
-If you don't pre-register users or a service provider, you'll have to do that
-stuff at runtime using the REST methods provided by the server. More
-information on these can be found in the [Go docs for the crewjam saml
-project][1], though you may find that cloning their project and digging around
-in the source code is easier.
-
-[1]: <https://pkg.go.dev/github.com/crewjam/saml#section-readme>
+If you don't pre-register users or a service provider with environment
+variables, this is the time to set things up. You must register at least one SP
+and at least one user.
 
 ## Cert
 
