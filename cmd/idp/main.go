@@ -7,11 +7,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -21,13 +23,15 @@ import (
 
 var logger = slog.New(slog.NewTextHandler(os.Stderr, nil))
 var srv *samlidp.Server
+var serviceID = 1
 
 type config struct {
-	baseURL    *url.URL
-	users      []string
-	serviceURL string
-	key        crypto.PrivateKey
-	cert       *x509.Certificate
+	baseURL     *url.URL
+	users       []string
+	serviceURL  string
+	autoloadDir string
+	key         crypto.PrivateKey
+	cert        *x509.Certificate
 }
 
 func registerUsers(srv *samlidp.Server, names []string) error {
@@ -75,27 +79,31 @@ func registerUser(srv *samlidp.Server, name string) error {
 	return nil
 }
 
-// registerService fetches the metadata from url and fakes an HTTP call to srv
-// because there's *no public API* for registering a service. We can't even
-// manually store data in the datastore because of all the magic that samlidp
-// does, again with no public API.
-func registerService(srv *samlidp.Server, url string) error {
-	// Grab the XML metadata
+// registerServiceURL fetches the metadata from url and calls registerService
+func registerServiceURL(srv *samlidp.Server, url string) error {
 	var c = http.Client{Timeout: time.Minute}
 	var resp, err = c.Get(url)
 	if err != nil {
 		return fmt.Errorf("fetching SAML SP metadata: %w", err)
 	}
-	var data []byte
-	data, err = ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+
+	return registerService(srv, resp.Body)
+}
+
+// registerService reads the metadata from r and fakes an HTTP call to srv
+// because there's *no public API* for registering a service. We can't even
+// manually store data in the datastore because of all the magic that samlidp
+// does, again with no public API.
+func registerService(srv *samlidp.Server, r io.Reader) error {
+	var data, err = ioutil.ReadAll(r)
 	if err != nil {
-		return fmt.Errorf("reading data from server metadata URL: %w", err)
+		return fmt.Errorf("reading data from server metadata: %w", err)
 	}
 
-	logger.Info("Registering service", "url", url)
-
+	var id = fmt.Sprintf("%d", serviceID)
 	var req *http.Request
-	req, err = newTestRequest("PUT", "/services/1", data, map[string]string{"id": "1"})
+	req, err = newTestRequest("PUT", "/services/"+id, data, map[string]string{"id": id})
 	if err != nil {
 		return fmt.Errorf("creating test request: %w", err)
 	}
@@ -105,7 +113,7 @@ func registerService(srv *samlidp.Server, url string) error {
 		return fmt.Errorf("failed http call to PUT service")
 	}
 
-	logger.Info("Service registration successful", "url", url)
+	serviceID++
 	return nil
 }
 
@@ -135,6 +143,11 @@ func initialize() (c *config, err error) {
 		c.serviceURL = val
 	}
 
+	val = os.Getenv("IDP_SP_AUTOLOAD_DIR")
+	if val != "" {
+		c.autoloadDir = val
+	}
+
 	c.key, err = getPrivateKey()
 	if err != nil {
 		return nil, err
@@ -159,9 +172,46 @@ Configuration is specified via environment variables:
   Passwords will be set to their username.
 - IDP_SERVICE_URL: Optional. URL to a service provider's metadata. If set, the
   service provider is pre-registered for use with this IDP.
+- IDP_SP_AUTOLOAD_DIR: Optional. Name of directory from which to load SP
+  metadata. All files that match *.xml in this directory will be loaded.
 
 `, os.Args[0])
 	os.Exit(code)
+}
+
+func autoload(dir string) {
+	logger.Info("Reading autoload directory", "directory", dir)
+	var entries, err = os.ReadDir(dir)
+	if err != nil {
+		logger.Error("Unable to read autoload directory", "error", err, "dir", dir)
+		return
+	}
+
+	for _, entry := range entries {
+		if !entry.Type().IsRegular() {
+			continue
+		}
+
+		var filename = dir + "/" + entry.Name()
+		if filepath.Ext(filename) != ".xml" {
+			continue
+		}
+
+		var f *os.File
+		f, err = os.Open(filename)
+		if err != nil {
+			logger.Error("Unable to open metadata file", "error", err, "file", filename)
+			continue
+		}
+		defer f.Close()
+
+		err = registerService(srv, f)
+		if err != nil {
+			logger.Error("Unable to register service", "error", err, "file", filename)
+		}
+
+		logger.Info("Registered service", "file", filename)
+	}
 }
 
 func main() {
@@ -191,10 +241,15 @@ func main() {
 	}
 
 	if conf.serviceURL != "" {
-		err = registerService(srv, conf.serviceURL)
+		logger.Info("Registering service", "source", conf.serviceURL)
+		err = registerServiceURL(srv, conf.serviceURL)
 		if err != nil {
 			logger.Error("Unable to register service", "error", err, "IDP_SERVICE_URL", conf.serviceURL)
 		}
+	}
+
+	if conf.autoloadDir != "" {
+		autoload(conf.autoloadDir)
 	}
 
 	var bind = ":" + conf.baseURL.Port()
