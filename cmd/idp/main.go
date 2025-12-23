@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/crewjam/saml/samlidp"
 	"golang.org/x/crypto/bcrypt"
@@ -80,7 +81,8 @@ func registerUser(srv *samlidp.Server, name string) error {
 // does, again with no public API.
 func registerService(srv *samlidp.Server, url string) error {
 	// Grab the XML metadata
-	var resp, err = http.Get(url)
+	var c = http.Client{Timeout: time.Minute}
+	var resp, err = c.Get(url)
 	if err != nil {
 		return fmt.Errorf("fetching SAML SP metadata: %w", err)
 	}
