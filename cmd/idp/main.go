@@ -122,7 +122,7 @@ func initialize() (c *config, err error) {
 
 	var val = os.Getenv("IDP_BASE_URL")
 	if val == "" {
-		return nil, errors.New("IDP_BASE_URL cannot not be blank")
+		return nil, errors.New("IDP_BASE_URL cannot be blank")
 	}
 	c.baseURL, err = url.Parse(val)
 	if err != nil {
