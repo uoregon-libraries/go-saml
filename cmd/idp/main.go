@@ -208,6 +208,7 @@ func autoload(dir string) {
 		err = registerService(srv, f)
 		if err != nil {
 			logger.Error("Unable to register service", "error", err, "file", filename)
+			os.Exit(1)
 		}
 
 		logger.Info("Registered service", "file", filename)
