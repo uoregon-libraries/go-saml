@@ -5,6 +5,10 @@ provider. It is not a production-usable idp! The cert and private key are
 *hard-coded* in the repository for ease of use, and that would be
 **disastrous** for a production setup.
 
+Additionally, the IDP returns users' email addresses as a simple hard-coded
+`<name>@uoregon.edu`. The users really need to be more configurable, and this
+*will* bite you if you aren't paying very close attention.
+
 ## Build
 
 To build simply run `make`. You'll need a supported Go compiler.
