@@ -81,14 +81,20 @@ func registerUser(srv *samlidp.Server, name string) error {
 
 // registerServiceURL fetches the metadata from url and calls registerService
 func registerServiceURL(srv *samlidp.Server, url string) error {
-	var c = http.Client{Timeout: time.Minute}
-	var resp, err = c.Get(url)
-	if err != nil {
-		return fmt.Errorf("fetching SAML SP metadata: %w", err)
+	var err error
+	for i := 0; i < 5; i++ {
+		var c = http.Client{Timeout: time.Minute}
+		var resp *http.Response
+		resp, err = c.Get(url)
+		if err == nil {
+			defer resp.Body.Close()
+			return registerService(srv, resp.Body)
+		}
+		var delay = 1 << i
+		logger.Info(fmt.Sprintf("Failed to register service, retrying in %d seconds", delay), "error", err)
+		time.Sleep(time.Duration(delay) * time.Second)
 	}
-	defer resp.Body.Close()
-
-	return registerService(srv, resp.Body)
+	return fmt.Errorf("fetching SAML SP metadata: %w", err)
 }
 
 // registerService reads the metadata from r and fakes an HTTP call to srv
