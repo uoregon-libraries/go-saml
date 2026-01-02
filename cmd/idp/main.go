@@ -234,6 +234,10 @@ func main() {
 		Certificate: conf.cert,
 		Logger:      &legacyLog{logger.With("caller", "idp")},
 		Store:       &samlidp.MemoryStore{},
+		MetadataValidScopes: []string{
+			conf.baseURL.Hostname(),
+			"uoregon.edu",
+		},
 	})
 	if err != nil {
 		logger.Error("Unable to create new IDP instance", "error", err)
