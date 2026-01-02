@@ -252,6 +252,7 @@ func main() {
 		err = registerServiceURL(srv, conf.serviceURL)
 		if err != nil {
 			logger.Error("Unable to register service", "error", err, "IDP_SERVICE_URL", conf.serviceURL)
+			os.Exit(1)
 		}
 	}
 
