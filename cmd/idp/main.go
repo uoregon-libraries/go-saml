@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/crewjam/saml/samlidp"
+	"github.com/uoregon-libraries/crewjam-saml/samlidp"
 	"golang.org/x/crypto/bcrypt"
 )
 

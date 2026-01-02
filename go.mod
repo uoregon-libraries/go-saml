@@ -3,7 +3,7 @@ module go-saml
 go 1.25.1
 
 require (
-	github.com/crewjam/saml v0.5.1
+	github.com/uoregon-libraries/crewjam-saml v0.6.0
 	golang.org/x/crypto v0.43.0
 )
 
