@@ -53,7 +53,7 @@ More information on these can be found by digging through the [`saml` module's
 codebase][1] (unfortunately the documentation doesn't cover the various magic
 endpoints).
 
-[1]: <https://pkg.go.dev/github.com/crewjam/saml#section-readme>
+[1]: <https://pkg.go.dev/github.com/uoregon-libraries/crewjam-saml#section-readme>
 
 ## Run
 
