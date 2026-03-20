@@ -70,14 +70,3 @@ Right now our certificate and private key are hard-coded (again please never
 use this in production). To set up a service provider, you need the cert. You
 can find it in `cmd/idp/certs.go`, though many SPs can just grab the public key
 from the idp's metadata endpoint (`/metadata`)
-
-## JSON output to browser?
-
-An odd bug we haven't yet nailed down is that after signing in, you get a blob
-of JSON in your browser with various IDP bits of metadata. You are supposed to
-get redirected to the SP, but it isn't happening properly. However, the auth
-cookies and session info are set properly in both the browser and the IDP, so
-if you manually return to the SP, and go to the login page again, you should be
-logged in to your SP.
-
-This is an open bug we plan to fix when time permits.
