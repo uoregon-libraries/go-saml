@@ -230,17 +230,17 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Println(Version)
+		fmt.Println("go-saml idp", Version)
 		os.Exit(0)
 	}
-
-	logger.Info("Starting go-saml IdP", "version", Version)
 
 	var conf, err = initialize()
 	if err != nil {
 		logger.Error("Unable to initialize application", "error", err)
 		usageExit(1)
 	}
+
+	logger.Info("Starting go-saml IdP", "version", Version)
 
 	srv, err = samlidp.New(samlidp.Options{
 		URL:         *conf.baseURL,
