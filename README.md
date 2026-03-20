@@ -49,9 +49,9 @@ wget --method=PUT --body-data='{"name": "alice", "password": "hunter2"}' http://
 wget --method=PUT --body-file=/path/to/metadata.xml http://localhost:8000/services/1
 ```
 
-More information on these can be found in the [Go docs for the crewjam saml
-project][1], though you may find that cloning their project and digging around
-in the source code is easier.
+More information on these can be found by digging through the [`saml` module's
+codebase][1] (unfortunately the documentation doesn't cover the various magic
+endpoints).
 
 [1]: <https://pkg.go.dev/github.com/crewjam/saml#section-readme>
 
