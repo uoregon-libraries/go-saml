@@ -64,6 +64,37 @@ If you don't pre-register users or a service provider with environment
 variables, this is the time to set things up. You must register at least one SP
 and at least one user.
 
+## Switching Users
+
+This IdP does not support SAML Single Logout (SLO). To switch between test
+users during development, you need to clear the session on both the SP and the
+IdP. Sign out of your SP application first, then use one of these strategies to
+clear the IdP session:
+
+**Clear browser cookies:** Delete cookies for the IdP's domain (e.g.,
+`localhost`). This forces re-authentication on the next SP-initiated login.
+
+**Use the `clear-sessions` command:** Run `make` to build, then clear all
+sessions at once:
+
+```bash
+./bin/clear-sessions http://localhost:8000
+```
+
+**Delete sessions via REST API:** Session IDs may contain characters like `+`,
+`/`, and `=` that must be URL-encoded:
+
+```bash
+# List active sessions
+curl http://localhost:8000/sessions/
+
+# Delete a specific session by ID (URL-encoding special characters)
+curl -X DELETE http://localhost:8000/sessions/$(python3 -c "import urllib.parse; print(urllib.parse.quote('<session-id>', safe=''))")
+```
+
+**Restart the IdP:** Sessions are stored in memory only, so restarting the
+process wipes all sessions.
+
 ## Cert
 
 Right now our certificate and private key are hard-coded (again please never
