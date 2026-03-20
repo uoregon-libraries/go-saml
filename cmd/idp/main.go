@@ -256,6 +256,12 @@ func main() {
 		usageExit(1)
 	}
 
+	// The default login form POSTs to LoginURL (/login), which returns JSON
+	// instead of completing the SAML flow. By pointing LoginURL at SSOURL, the
+	// form POSTs back to /sso with the SAMLRequest and RelayState, so ServeSSO
+	// can create the session and redirect to the SP with a proper SAML response.
+	srv.IDP.LoginURL = srv.IDP.SSOURL
+
 	if conf.users != nil {
 		err = registerUsers(srv, conf.users)
 		if err != nil {
