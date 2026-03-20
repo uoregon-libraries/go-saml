@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -20,6 +21,9 @@ import (
 	"github.com/uoregon-libraries/crewjam-saml/samlidp"
 	"golang.org/x/crypto/bcrypt"
 )
+
+// Version is set at build time via -ldflags
+var Version = "unknown"
 
 var logger = slog.New(slog.NewTextHandler(os.Stderr, nil))
 var srv *samlidp.Server
@@ -222,6 +226,16 @@ func autoload(dir string) {
 }
 
 func main() {
+	var showVersion = flag.Bool("version", false, "Print version and exit")
+	flag.Parse()
+
+	if *showVersion {
+		fmt.Println(Version)
+		os.Exit(0)
+	}
+
+	logger.Info("Starting go-saml IdP", "version", Version)
+
 	var conf, err = initialize()
 	if err != nil {
 		logger.Error("Unable to initialize application", "error", err)

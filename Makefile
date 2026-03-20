@@ -1,6 +1,8 @@
+VERSION ?= $(shell git describe --tags --always --dirty=-wip)
+
 .PHONY: bin
 bin:
-	go build -ldflags="-s -w" -o bin/idp go-saml/cmd/idp
+	go build -ldflags="-s -w -X main.Version=$(VERSION)" -o bin/idp go-saml/cmd/idp
 
 .PHONY: lint
 lint:
