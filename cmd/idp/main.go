@@ -240,8 +240,6 @@ func main() {
 		usageExit(1)
 	}
 
-	logger.Info("Starting go-saml IdP", "version", Version)
-
 	srv, err = samlidp.New(samlidp.Options{
 		URL:         *conf.baseURL,
 		Key:         conf.key,
@@ -279,7 +277,7 @@ func main() {
 	}
 
 	var bind = ":" + conf.baseURL.Port()
-	logger.Info("Starting server", "bind address", bind)
+	logger.Info("Starting server", "bind address", bind, "version", Version)
 	err = http.ListenAndServe(bind, srv)
 	if err != nil {
 		logger.Error("Unable to start HTTP listener", "error", err)
