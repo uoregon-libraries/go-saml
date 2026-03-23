@@ -71,8 +71,12 @@ users during development, you need to clear the session on both the SP and the
 IdP. Sign out of your SP application first, then use one of these strategies to
 clear the IdP session:
 
+### Cookies
+
 **Clear browser cookies:** Delete cookies for the IdP's domain (e.g.,
 `localhost`). This forces re-authentication on the next SP-initiated login.
+
+### Session-clearing app
 
 **Use the `clear-sessions` command:** Run `make` to build, then clear all
 sessions at once:
@@ -80,6 +84,8 @@ sessions at once:
 ```bash
 ./bin/clear-sessions http://localhost:8000
 ```
+
+### Session-clearing via REST
 
 **Delete sessions via REST API:** Session IDs may contain characters like `+`,
 `/`, and `=` that must be URL-encoded:
@@ -91,6 +97,8 @@ curl http://localhost:8000/sessions/
 # Delete a specific session by ID (URL-encoding special characters)
 curl -X DELETE http://localhost:8000/sessions/$(python3 -c "import urllib.parse; print(urllib.parse.quote('<session-id>', safe=''))")
 ```
+
+### Restart go-saml
 
 **Restart the IdP:** Sessions are stored in memory only, so restarting the
 process wipes all sessions.
